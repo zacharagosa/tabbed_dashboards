@@ -13,6 +13,12 @@
 // limitations under the License.
 
 const commonConfig = require('./webpack.config')
+const webpack = require('webpack');
+const dotenv = require('dotenv');
+
+
+dotenv.config({ path: './.env' }); // Load .env.development file
+
 
 module.exports = {
   ...commonConfig,
@@ -44,5 +50,7 @@ module.exports = {
         'X-Requested-With, content-type, Authorization',
     },
   },
-  plugins: [...commonConfig.plugins],
+  plugins: [...commonConfig.plugins, new webpack.DefinePlugin({
+    'process.env': JSON.stringify(process.env),
+  }),]
 }

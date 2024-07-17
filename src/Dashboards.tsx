@@ -21,7 +21,7 @@ export const DashboardFilterContext =
         setDashboardFilters: () => {},
     });
 
-const hostUrl = "https://nordstromtrial.cloud.looker.com";
+const hostUrl = process.env[`LOOKER_HOST_NAME`];
 LookerEmbedSDK.init(hostUrl);
 
 interface EmbeddedDashboardProps {

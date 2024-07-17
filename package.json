@@ -23,6 +23,7 @@
     "@styled-icons/material-outlined": "10.34.0",
     "@styled-icons/material-rounded": "10.34.0",
     "date-fns": "^2.25.0",
+    "dotenv": "^16.4.5",
     "lodash": "^4.17.21",
     "react": "16.11",
     "react-dom": "16.11",

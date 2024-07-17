@@ -5,6 +5,7 @@ import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import "react-tabs/style/react-tabs.scss"; // Import the Sass file
 import "./Tabs.css"; // Import your custom styles afterward
 
+
 import EmbeddedDashboard from "./Dashboards";
 import { DashboardFilterContext } from "./Dashboards"; // Import the context
 import { LookerEmbedDashboard } from "@looker/embed-sdk"; // Import LookerEmbedDashboard
@@ -18,9 +19,40 @@ export const TabbedDashboards = () => {
         connected: { [key: number]: boolean }; // Allow string or number keys
     }
 
-    const [tabState, setTabState] = useState<TabState>({
+    const getEnvVar = (name: string) => {
+        if (typeof window !== 'undefined' && window.process && window.process.env) {
+            return window.process.env[name];
+        } else {
+            return null;
+        }
+    };
+
+    // Dynamically fetch tabs from environment variables (with fallback)
+    const tabConfig: { name: string; id: number }[] = [];
+
+    let i = 1;
+    while (process.env[`REACT_APP_TAB_${i}_NAME`] && process.env[`REACT_APP_TAB_${i}_ID`]) {
+        tabConfig.push({
+            name: process.env[`REACT_APP_TAB_${i}_NAME`],
+            id: Number(process.env[`REACT_APP_TAB_${i}_ID`]),
+        });
+        i++;
+    }
+
+
+// Define a default tab configuration in case env vars are not available
+    const defaultTabConfig = [
+        { name: "Customer Behavior", id: 1 },
+        { name: "Customer Data", id: 2 },
+        { name: "Customer Profile", id: 3 },
+    ];
+
+    // If no tabs are found in the environment, use the default configuration
+    const tabs = tabConfig.length > 0 ? tabConfig : defaultTabConfig;
+
+    const [tabState, setTabState] = useState({
         activeTab: 0,
-        connected: { 0: false, 1: false, 2: false },
+        connected: Array(tabs.length).fill(false),
     });
 
     const setDashboardInstance = useCallback((index: number, dashboard: LookerEmbedDashboard) => {
@@ -64,44 +96,30 @@ export const TabbedDashboards = () => {
 
     return (
 
-        <DashboardFilterContext.Provider
-            value={{ dashboardFilters, setDashboardFilters }}
-        >
-            <Tabs selectedIndex={tabState.activeTab} onSelect={(index) =>setTabState(prev => ({ ...prev, activeTab: index }))}  >
+        <DashboardFilterContext.Provider value={{ dashboardFilters, setDashboardFilters }}>
+            <Tabs
+                selectedIndex={tabState.activeTab}
+                onSelect={(index) =>
+                    setTabState((prev) => ({ ...prev, activeTab: index }))
+                }
+            >
                 <TabList className="my-tab-list">
-                    <Tab>Customer Behavior</Tab>
-                    <Tab>Customer Data</Tab>
-                    <Tab>Customer Profile</Tab>
+                    {tabs.map((tab, index) => (
+                        <Tab key={index}>{tab.name}</Tab>
+                    ))}
                 </TabList>
 
-                <TabPanel>
-                    <EmbeddedDashboard
-                            id={11}
-                            onConnected={() => handleConnected(0)} // No need to pass dashboard instance
-                            dashboardRef={dashboardRefs} // Pass dashboardRefs to EmbeddedDashboard
-                            isActive={tabState.activeTab === 0} // Add the isActive prop
-
-                    /> {/* Pass active state */}
-                    </TabPanel>
-                        <TabPanel>
+                {tabs.map((tab, index) => (
+                    <TabPanel key={index}>
                         <EmbeddedDashboard
-                            id={6}
-                            onConnected={() => handleConnected(1)} // No need to pass dashboard instance
-                            dashboardRef={dashboardRefs} // Pass dashboardRefs to EmbeddedDashboard
-                            isActive={tabState.activeTab === 1} // Add the isActive prop
-
+                            id={tab.id}
+                            onConnected={() => handleConnected(index)}
+                            dashboardRef={dashboardRefs}
+                            isActive={tabState.activeTab === index}
                         />
-                        </TabPanel>
-                    <TabPanel>
-                            <EmbeddedDashboard
-                            id={1}
-                            onConnected={() => handleConnected(2)} // No need to pass dashboard instance
-                            dashboardRef={dashboardRefs} // Pass dashboardRefs to EmbeddedDashboard
-                            isActive={tabState.activeTab === 2} // Add the isActive prop
-
-                            />
                     </TabPanel>
+                ))}
             </Tabs>
-         </DashboardFilterContext.Provider>
+        </DashboardFilterContext.Provider>
     );
 };
