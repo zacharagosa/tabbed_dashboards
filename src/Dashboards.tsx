@@ -74,11 +74,6 @@ const EmbeddedDashboard = (props: EmbeddedDashboardProps) => {
         transition: 'opacity 0.5s ease-in-out' // Add transition for fade-in effect
     };
 
-    // useEffect to fetch and set dashboard filters
-
-
-    // Function to update dashboard filters
-
     return <EmbedContainer  ref={embedCtrRef}
                             className={props.isActive ? 'visible' : ''}>
             </EmbedContainer>;

@@ -27,7 +27,6 @@ export const TabbedDashboards = () => {
         }
     };
 
-    // Dynamically fetch tabs from environment variables (with fallback)
     const tabConfig: { name: string; id: number }[] = [];
 
     let i = 1;
@@ -39,15 +38,12 @@ export const TabbedDashboards = () => {
         i++;
     }
 
-
-// Define a default tab configuration in case env vars are not available
     const defaultTabConfig = [
         { name: "Customer Behavior", id: 1 },
         { name: "Customer Data", id: 2 },
         { name: "Customer Profile", id: 3 },
     ];
 
-    // If no tabs are found in the environment, use the default configuration
     const tabs = tabConfig.length > 0 ? tabConfig : defaultTabConfig;
 
     const [tabState, setTabState] = useState({
@@ -82,7 +78,7 @@ export const TabbedDashboards = () => {
                     }
                 }
             }
-        }, 1000); // Adjust timeout as needed
+        }, 1000);
     };
 
 
