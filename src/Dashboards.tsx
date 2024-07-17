@@ -42,7 +42,6 @@ const EmbeddedDashboard = (props: EmbeddedDashboardProps) => {
     useEffect(() => {
         if (dashboard) {
             dashboard.updateFilters(dashboardFilters);
-            console.log("updating fu")
         }    }, [dashboard, dashboardFilters]);
 
     useEffect(() => {
