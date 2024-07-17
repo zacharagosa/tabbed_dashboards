@@ -44,7 +44,7 @@ module.exports = {
   },
   output: {
     path: __dirname + "/dist",
-    filename: "bundle.js",
+    filename: "bundle_tab.js",
   },
   module: {
     rules: [

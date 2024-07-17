@@ -64,7 +64,7 @@ For production deployment, you'll typically need to set the environment variable
    ```
    application: tabbed-dashboard { 
    label: "Tabbed Dashboards with Filter Consistency"
-   url: "https://localhost:8080/bundle.js"
+   url: "https://localhost:8080/bundle_tab.js"
    entitlements: {
    use_iframes: yes
    core_api_methods: ["me"]
@@ -94,13 +94,13 @@ For production deployment, you'll typically need to set the environment variable
 To allow other people to use the extension, build the JavaScript bundle file and directly include it in the project.
 
 1. Build the extension with `npm run build` in the extension project directory on your development machine.
-2. Drag and drop the generated `dist/bundle.js` file into the Looker project interface
+2. Drag and drop the generated `dist/bundle_tab.js` file into the Looker project interface
 3. Modify your `manifest.lkml` to use `file` instead of `url`:
 
    ```
    application: tabbed-dashboard { 
    label: "Tabbed Dashboards with Filter Consistency"
-   file: "bundle.js"
+   file: "bundle_tab.js"
    entitlements: {
    use_iframes: yes
    core_api_methods: ["me"]
