@@ -8,12 +8,16 @@ import "./Tabs.css"; // Import your custom styles afterward
 
 import EmbeddedDashboard from "./Dashboards";
 import { DashboardFilterContext } from "./Dashboards"; // Import the context
-import { LookerEmbedDashboard } from "@looker/embed-sdk"; // Import LookerEmbedDashboard
+import { LookerEmbedDashboard, LookerEmbedSDK } from "@looker/embed-sdk"; // Import LookerEmbedDashboard
 
 
 export const TabbedDashboards = () => {
     // Create the shared state for the filters
     const [dashboardFilters, setDashboardFilters] = useState(null);
+    const [hasLoadedTabs, setHasLoadedTabs] = useState(false);
+    const [dashboardInstances, setDashboardInstances] = useState<(LookerEmbedDashboard | null)[]>([]);
+
+
     interface TabState {
         activeTab: number;
         connected: { [key: number]: boolean }; // Allow string or number keys
@@ -27,6 +31,12 @@ export const TabbedDashboards = () => {
         }
     };
 
+    useEffect(() => {
+        // ... existing logic to populate tabConfig ...
+        setHasLoadedTabs(true); // Set hasLoadedTabs to true once loading is done
+    }, []); // Empty dependency array ensures this runs only once
+
+
     const tabConfig: { name: string; id: number }[] = [];
 
     let i = 1;
@@ -36,6 +46,7 @@ export const TabbedDashboards = () => {
             id: Number(process.env[`REACT_APP_TAB_${i}_ID`]),
         });
         i++;
+        console.log(tabConfig)
     }
 
     const defaultTabConfig = [
@@ -44,18 +55,19 @@ export const TabbedDashboards = () => {
         { name: "Customer Profile", id: 3 },
     ];
 
+
     const tabs = tabConfig.length > 0 ? tabConfig : defaultTabConfig;
+    const dashboardRefs = useRef(dashboardInstances);
 
     const [tabState, setTabState] = useState({
         activeTab: 0,
         connected: Array(tabs.length).fill(false),
     });
 
-    const setDashboardInstance = useCallback((index: number, dashboard: LookerEmbedDashboard) => {
-        dashboardRefs.current = dashboardRefs.current.map((d, i) => (i === index ? dashboard : d));
-    }, []);
+    const embedContainerRefs = useRef<(HTMLDivElement | null)[]>(
+        Array(tabs.length).fill(null)
+    );
 
-    const dashboardRefs = useRef<(LookerEmbedDashboard | null)[]>([]); // Array to store dashboard instances
 
     useEffect(() => {
         // Ensure all dashboards have loaded before applying filters
@@ -63,6 +75,36 @@ export const TabbedDashboards = () => {
             handleTabClick(tabState.activeTab);
         }
     }, [tabState.connected, dashboardFilters,tabState.activeTab]); // This useEffect will run whenever tabState.connected changes
+
+    useEffect(() => {
+        if (hasLoadedTabs && tabs.length > 0) {
+            Promise.all(
+                tabs.map(async (tab, index) => {
+                    const embedContainer = document.createElement("div");
+                    embedContainerRefs.current[index] = embedContainer;
+
+                    const dashboard = await LookerEmbedSDK.createDashboardWithId(tab.id)
+                        .appendTo(embedContainer)
+                        .withFilters(dashboardFilters)
+                        .on("dashboard:filters:changed", (event) => {
+                            setDashboardFilters(event.dashboard.dashboard_filters);
+                        })
+                        .build()
+                        .connect();
+
+                    return {index, dashboard}; // Return both index and dashboard
+                })
+            ).then(results => {
+                const newInstances = Array(tabs.length).fill(null) as (LookerEmbedDashboard | null)[]; // Initialize with nulls
+                results.forEach(({index, dashboard}) => {
+                    newInstances[index] = dashboard;
+                });
+                setDashboardInstances(newInstances);
+            });
+        }
+    }, [hasLoadedTabs, tabs]);
+
+
 
     const handleTabClick = async (tabId: number) => {
         setTabState((prev) => ({ ...prev, activeTab: tabId }));
@@ -83,16 +125,22 @@ export const TabbedDashboards = () => {
 
 
     const handleConnected = useCallback(
-        (tabId: number) => {
+        (tabId: number, dashboard: LookerEmbedDashboard) => {
             setTabState((prev) => ({ ...prev, connected: { ...prev.connected, [tabId]: true } }));
-            console.log("Initial filters applied to dashboard", tabId);
+            setDashboardInstances(prevInstances => {
+                const newInstances = [...prevInstances];
+                newInstances[tabId] = dashboard;
+                return newInstances;
+            });
         },
         [dashboardFilters]
     );
 
     return (
 
-        <DashboardFilterContext.Provider value={{ dashboardFilters, setDashboardFilters }}>
+        <DashboardFilterContext.Provider
+            value={{ dashboardFilters, setDashboardFilters }}
+        >
             <Tabs
                 selectedIndex={tabState.activeTab}
                 onSelect={(index) =>
@@ -108,10 +156,9 @@ export const TabbedDashboards = () => {
                 {tabs.map((tab, index) => (
                     <TabPanel key={index}>
                         <EmbeddedDashboard
-                            id={tab.id}
-                            onConnected={() => handleConnected(index)}
-                            dashboardRef={dashboardRefs}
+                            dashboardRef={embedContainerRefs}
                             isActive={tabState.activeTab === index}
+                            index={index}
                         />
                     </TabPanel>
                 ))}
