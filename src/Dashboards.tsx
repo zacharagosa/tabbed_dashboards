@@ -50,9 +50,9 @@ const EmbeddedDashboard: React.FC<EmbeddedDashboardProps> = ({ id, isActive }) =
                 });
             
             return () => {
-                if (localDashboard && typeof localDashboard.close === 'function') {
+                if (localDashboard && typeof localDashboard.stop() === 'function') {
                     try {
-                        localDashboard.close();
+                        localDashboard.stop();
                     } catch (e) {
                         // Log any error during close, though it's mostly best-effort
                         console.error("Error during dashboard close:", e);
