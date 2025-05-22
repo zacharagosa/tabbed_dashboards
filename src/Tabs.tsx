@@ -60,11 +60,23 @@ export const TabbedDashboards = () => {
 
     // Removed handleConnected function
 
+    const tabOrientation = process.env.REACT_APP_TAB_ORIENTATION || 'horizontal';
+    let orientationClass = 'tab-orientation-horizontal';
+    if (tabOrientation === 'vertical-left') {
+        orientationClass = 'tab-orientation-vertical-left';
+    } else if (tabOrientation === 'vertical-right') {
+        orientationClass = 'tab-orientation-vertical-right';
+    }
+
+    const tabTheme = process.env.REACT_APP_TAB_THEME || 'default';
+    const themeClass = `tab-theme-${tabTheme}`;
+
     return (
         <DashboardFilterContext.Provider
             value={{ dashboardFilters, setDashboardFilters }}
         >
             <Tabs
+                className={`${orientationClass} ${themeClass}`} // Combined orientation and theme classes
                 selectedIndex={tabState.activeTab}
                 onSelect={handleTabClick} // Directly use handleTabClick, it now matches the expected signature
             >
