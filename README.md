@@ -1,109 +1,96 @@
-# Looker Extension tabbed-dashboard
+# Tabbed Looker Dashboards React/Typescript Example
 
-tabbed-dashboard is a Looker extension using React and TypeScript.
+This is a sample Looker Extension written in TypeScript and React. It demonstrates how to embed multiple Looker dashboards within a tabbed interface. The extension uses the Looker Extension SDK for authentication and the Looker Embed SDK for rendering dashboards.
 
+## Features
+- Embed multiple Looker dashboards.
+- Navigate dashboards using a tabbed interface.
+- Shared filter state across dashboards (basic implementation).
+- Customizable tab orientation (horizontal, vertical-left, vertical-right).
+- Customizable tab themes (default, dark, compact).
 
-## Configuration File (`.env.development`)
+## Setup & Configuration
 
-The `tabbed-dashboard` extension allows you to dynamically configure the tabs and their corresponding dashboard IDs using a configuration file named `.env.development`. This file should be located in the root directory of your project.
+1.  **Prerequisites:**
+    *   Node.js (version specified in `.nvmrc` if present, or latest LTS)
+    *   Yarn (recommended) or npm
+    *   Access to a Looker instance.
 
-### Structure
+2.  **Environment Variables:**
+    Create a `.env.development` file in the root of the project for local development. For production, configure these variables in your deployment environment.
 
-The `.env.development` file should have the following structure:
+    *   `LOOKER_HOST_NAME`: The hostname of your Looker instance (e.g., `yourinstance.looker.com`). This should **not** include `https://`.
+    *   `REACT_APP_TAB_1_NAME`: Name for the first tab.
+    *   `REACT_APP_TAB_1_ID`: Looker Dashboard ID for the first tab.
+    *   `REACT_APP_TAB_2_NAME`: Name for the second tab.
+    *   `REACT_APP_TAB_2_ID`: Looker Dashboard ID for the second tab.
+    *   ... (Add more tabs as needed, following the pattern `REACT_APP_TAB_N_NAME` and `REACT_APP_TAB_N_ID`)
 
-## Getting Started for Development
-
-
-* Each line represents a single tab.
-* `REACT_APP_TAB_{NUMBER}_NAME`: Specifies the name of the tab that will be displayed.
-* `REACT_APP_TAB_{NUMBER}_ID`: Specifies the ID of the Looker dashboard to embed within the tab.
-* `{NUMBER}`: A sequential number starting from 1 to identify each tab.
-
-### Adding/Modifying Tabs
-
-1. Open the `.env.development` file in your project's root directory.
-2. Add new lines following the format above to create additional tabs.
-3. To modify an existing tab, simply change its name or ID.
-4. Save the `.env.development` file.
-
-### Development
-
-During development, Create React App will automatically pick up the changes you make to the `.env.development` file. You might need to restart your development server to see the changes reflected in your extension.
-
-### Production
-
-For production deployment, you'll typically need to set the environment variables on your production server through your deployment platform's configuration options. Refer to your platform's documentation for instructions on how to set environment variables in production.
-
-1. Install the dependencies NPM
-
-    ```sh
-    NPM install
+    Example `.env.development` for basic tab setup:
+    ```
+    LOOKER_HOST_NAME=yourinstance.cloud.looker.com
+    REACT_APP_TAB_1_NAME="Sales Overview"
+    REACT_APP_TAB_1_ID=123
+    REACT_APP_TAB_2_NAME="Customer Insights"
+    REACT_APP_TAB_2_ID=456
     ```
 
-2. Build the project
+    ---
 
-    ```sh
-    NPM run develop
+    ### Tab Appearance Configuration (Optional)
+
+    You can customize the appearance and layout of the tabs by setting the following environment variables:
+
+    *   **`REACT_APP_TAB_ORIENTATION`**: Controls the layout of the tabs.
+        *   Possible values:
+            *   `horizontal` (Default): Tabs are displayed at the top.
+            *   `vertical-left`: Tabs are displayed on the left side.
+            *   `vertical-right`: Tabs are displayed on the right side.
+        *   Example: `REACT_APP_TAB_ORIENTATION=vertical-left`
+
+    *   **`REACT_APP_TAB_THEME`**: Controls the visual theme of the tabs.
+        *   Possible values:
+            *   `default` (Default): Standard theme.
+            *   `dark`: Dark theme for tabs.
+            *   `compact`: Compact theme with reduced spacing and font size.
+        *   Example: `REACT_APP_TAB_THEME=dark`
+
+    Example `.env.development` including appearance configuration:
+    ```
+    LOOKER_HOST_NAME=yourinstance.cloud.looker.com
+    REACT_APP_TAB_1_NAME="Sales Overview"
+    REACT_APP_TAB_1_ID=123
+    REACT_APP_TAB_2_NAME="Customer Insights"
+    REACT_APP_TAB_2_ID=456
+    REACT_APP_TAB_ORIENTATION=vertical-left
+    REACT_APP_TAB_THEME=dark
     ```
 
-    The development server is now running and serving the JavaScript at https://localhost:8080/bundle.js.
+## Development
 
-4. Now log in to Looker and create a new project.
+1.  Install dependencies:
+    ```bash
+    yarn install
+    ```
+2.  Start the development server:
+    ```bash
+    yarn develop
+    ```
+    This will typically start the server on `https://localhost:8080`.
 
-    Depending on the version of Looker, a new project can be created under:
+## Building for Production
 
-    - **Develop** => **Manage LookML Projects** => **New LookML Project**, or
-    - **Develop** => **Projects** => **New LookML Project**
+```bash
+yarn build
+```
+This command bundles the application into the `dist` folder.
 
-    Select "Blank Project" as the "Starting Point". This creates a new LookML project with no files.
+## Key Files
+- `src/App.tsx`: Main application component.
+- `src/Tabs.tsx`: Handles tab creation, dashboard embedding logic, orientation, and theming.
+- `src/Dashboards.tsx`: Component for embedding individual Looker dashboards.
+- `src/Tabs.css`: Contains styles for tab orientation and theming.
+- `webpack.config.js`: Webpack configuration for bundling.
 
-5. Create a `manifest` file
-
-   Either drag and upload the `manifest.lkml` file in this directory into your Looker project, or create a `manifest.lkml` with the same content. Change the `id`, `label`, or `url` as needed.
-
-   ```
-   application: tabbed-dashboard { 
-   label: "Tabbed Dashboards with Filter Consistency"
-   url: "https://localhost:8080/bundle_tab.js"
-   entitlements: {
-   use_iframes: yes
-   core_api_methods: ["me"]
-   }
-   }
-   ```
-
-6. Create a `model` LookML file in your project.
-
-   Typically, the model is named the same as the extension project. The model is used to control access to the extension.
-
-   - [Configure the model you created](https://docs.looker.com/data-modeling/getting-started/create-projects#configuring_a_model) so that it has access to some connection (any connection).
-
-7. Connect the new project to Git.
-
-   - Create a new repository on GitHub or a similar service, and follow the instructions to [connect your project to Git](https://docs.looker.com/data-modeling/getting-started/setting-up-git-connection)
-
-8. Commit the changes and deploy them to production through the Project UI.
-
-9. Reload the page and click the `Browse` dropdown menu. You should see the extension label in the list.
-
-   - The extension will load the JavaScript from the `url` you provided in the `application` definition. By default, this is `https://localhost:8080/bundle.js`. If you change the port your server runs on in the `package.json`, you will need to also update it in the `manifest.lkml`.
-   - Reloading the extension page will bring in any new code changes from the extension template.
-
-## Deploying the extension
-
-To allow other people to use the extension, build the JavaScript bundle file and directly include it in the project.
-
-1. Build the extension with `npm run build` in the extension project directory on your development machine.
-2. Drag and drop the generated `dist/bundle_tab.js` file into the Looker project interface
-3. Modify your `manifest.lkml` to use `file` instead of `url`:
-
-   ```
-   application: tabbed-dashboard { 
-   label: "Tabbed Dashboards with Filter Consistency"
-   file: "bundle_tab.js"
-   entitlements: {
-   use_iframes: yes
-   core_api_methods: ["me"]
-   }
-   }
-   ```
+## License
+This project is licensed under the Apache-2.0 License.

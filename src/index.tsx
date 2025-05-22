@@ -13,12 +13,13 @@
 // limitations under the License.
 
 import React from 'react'
-import ReactDOM from 'react-dom'
+import ReactDOM from 'react-dom/client' // Changed import
 import { App } from './App'
 
 
 window.addEventListener('DOMContentLoaded', (_) => {
-  const root = document.createElement('div')
-  document.body.appendChild(root)
-  ReactDOM.render(<App />, root)
+  const container = document.createElement('div');
+  document.body.appendChild(container);
+  const root = ReactDOM.createRoot(container); // Create a root.
+  root.render(<App />); // Render on the root.
 })

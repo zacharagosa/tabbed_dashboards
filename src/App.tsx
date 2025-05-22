@@ -20,8 +20,7 @@
 import React from 'react'
 import { ExtensionProvider40 } from '@looker/extension-sdk-react'
 import { hot } from 'react-hot-loader/root'
-import { Looker40SDK } from '@looker/sdk';
-
+// Looker40SDK import removed
 
 import { TabbedDashboards } from "./Tabs";
 

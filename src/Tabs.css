@@ -18,3 +18,183 @@
     background-color: #e9ecef;
     border-bottom: 1px solid #fff;
 }
+
+/* Default/Horizontal styling enhancements (if any, or ensure it's not broken) */
+.react-tabs.tab-orientation-horizontal {
+    /* Default flex direction is row for tab list, this is mostly a marker class */
+}
+
+/* Vertical Tabs Common Styling */
+.react-tabs.tab-orientation-vertical-left,
+.react-tabs.tab-orientation-vertical-right {
+    display: flex;
+}
+
+.react-tabs.tab-orientation-vertical-left .react-tabs__tab-list,
+.react-tabs.tab-orientation-vertical-right .react-tabs__tab-list {
+    flex-direction: column;
+    border-bottom: none; /* Remove bottom border from horizontal style */
+    width: 200px; /* Example width, adjust as needed */
+}
+
+.react-tabs.tab-orientation-vertical-left .react-tabs__tab-list {
+    border-right: 1px solid #aaa;
+    margin-right: 0; /* Remove any margin causing gap between tablist and panel */
+}
+
+.react-tabs.tab-orientation-vertical-right .react-tabs__tab-list {
+    order: 1; /* Place tab list after tab panels */
+    border-left: 1px solid #aaa;
+    margin-left: 0; /* Remove any margin causing gap */
+}
+
+.react-tabs.tab-orientation-vertical-left .react-tabs__tab,
+.react-tabs.tab-orientation-vertical-right .react-tabs__tab {
+    width: 100%;
+    border-right: none !important; /* Override potential right border from horizontal style */
+    border-bottom: 1px solid #aaa;  /* Separator for vertical tabs */
+    margin: 0;
+}
+
+.react-tabs.tab-orientation-vertical-left .react-tabs__tab:last-child,
+.react-tabs.tab-orientation-vertical-right .react-tabs__tab:last-child {
+     border-bottom: none; /* No border for the last tab */
+}
+
+.react-tabs.tab-orientation-vertical-left .react-tabs__tab--selected {
+    border-left: 3px solid #3498db; /* Blue left border for selected tab */
+    border-top-color: transparent !important; /* Clean up borders */
+    border-right-color: transparent !important;
+    border-bottom-color: transparent !important;
+    background: #f0f0f0; /* Slight background for selected tab */
+}
+
+.react-tabs.tab-orientation-vertical-right .react-tabs__tab--selected {
+    border-right: 3px solid #3498db; /* Blue right border for selected tab */
+    border-top-color: transparent !important;
+    border-left-color: transparent !important;
+    border-bottom-color: transparent !important;
+    background: #f0f0f0; /* Slight background for selected tab */
+}
+
+.react-tabs.tab-orientation-vertical-left .react-tabs__tab-panel--selected,
+.react-tabs.tab-orientation-vertical-right .react-tabs__tab-panel--selected {
+    flex-grow: 1;
+    padding: 10px; /* Add some padding to the panel content */
+    border-left: none; /* Ensure no conflicting borders from horizontal mode */
+}
+
+/* --- Default Theme --- */
+/* Base styling for default theme (applied to .react-tabs.tab-theme-default) */
+.react-tabs.tab-theme-default .react-tabs__tab {
+    background-color: #e0e0e0; /* Lighter than previous example for better contrast */
+    color: #333;
+    border-color: #aaa; /* Consistent border color */
+}
+
+.react-tabs.tab-theme-default .react-tabs__tab:hover {
+    background-color: #f0f0f0;
+}
+
+.react-tabs.tab-theme-default .react-tabs__tab--selected {
+    background-color: #ffffff;
+    color: #000;
+    border-top: 2px solid #3498db; /* Horizontal selected */
+}
+
+/* Default theme - Vertical selected tabs */
+.react-tabs.tab-theme-default.tab-orientation-vertical-left .react-tabs__tab--selected {
+    border-left: 2px solid #3498db;
+    border-top: none; /* Override horizontal */
+    border-right-color: #fff; /* Make it look like it's part of the content area */
+}
+
+.react-tabs.tab-theme-default.tab-orientation-vertical-right .react-tabs__tab--selected {
+    border-right: 2px solid #3498db;
+    border-top: none; /* Override horizontal */
+    border-left-color: #fff; /* Make it look like it's part of the content area */
+}
+
+.react-tabs.tab-theme-default .react-tabs__tab-list {
+    border-bottom-color: #aaa; /* Horizontal */
+}
+.react-tabs.tab-theme-default.tab-orientation-vertical-left .react-tabs__tab-list {
+    border-right-color: #aaa;
+}
+.react-tabs.tab-theme-default.tab-orientation-vertical-right .react-tabs__tab-list {
+    border-left-color: #aaa;
+}
+
+
+/* --- Dark Theme --- */
+.react-tabs.tab-theme-dark {
+    /* Overall container for dark theme if needed, though most styling is on elements below */
+}
+
+.react-tabs.tab-theme-dark .react-tabs__tab-list {
+    border-bottom-color: #444; /* Horizontal */
+}
+.react-tabs.tab-theme-dark.tab-orientation-vertical-left .react-tabs__tab-list {
+    border-right-color: #444;
+}
+.react-tabs.tab-theme-dark.tab-orientation-vertical-right .react-tabs__tab-list {
+    border-left-color: #444;
+}
+
+.react-tabs.tab-theme-dark .react-tabs__tab {
+    background-color: #333;
+    color: #eee;
+    border-color: #444; 
+}
+
+.react-tabs.tab-theme-dark .react-tabs__tab:hover {
+    background-color: #4a4a4a;
+}
+
+.react-tabs.tab-theme-dark .react-tabs__tab--selected {
+    background-color: #2a2a2a; /* Darker selected tab background */
+    color: #ffffff;
+    border-top: 2px solid #00aaff; /* Horizontal selected */
+    border-color: #555 #555 #2a2a2a #555; /* Selected tab border colors for horizontal */
+}
+
+/* Dark theme - Vertical selected tabs */
+.react-tabs.tab-theme-dark.tab-orientation-vertical-left .react-tabs__tab--selected {
+    border-left: 2px solid #00aaff;
+    border-top: none; /* Override horizontal */
+    border-right-color: #2a2a2a; /* Make it look like it's part of the content area */
+    border-bottom-color: #444;
+    border-top-color: #444;
+}
+
+.react-tabs.tab-theme-dark.tab-orientation-vertical-right .react-tabs__tab--selected {
+    border-right: 2px solid #00aaff;
+    border-top: none; /* Override horizontal */
+    border-left-color: #2a2a2a; /* Make it look like it's part of the content area */
+    border-bottom-color: #444;
+    border-top-color: #444;
+}
+
+.react-tabs.tab-theme-dark .react-tabs__tab--disabled {
+    background-color: #252525;
+    color: #666;
+}
+
+/* --- Compact Theme --- */
+.react-tabs.tab-theme-compact .react-tabs__tab {
+    padding: 6px 10px; /* Reduced padding */
+    font-size: 0.9em; /* Slightly smaller font */
+}
+/* You might need to adjust selected indicators for compact theme if they look too large */
+.react-tabs.tab-theme-compact.tab-orientation-vertical-left .react-tabs__tab--selected {
+    border-left-width: 2px; /* Thinner border for compact */
+}
+.react-tabs.tab-theme-compact.tab-orientation-vertical-right .react-tabs__tab--selected {
+    border-right-width: 2px; /* Thinner border for compact */
+}
+.react-tabs.tab-theme-compact .react-tabs__tab--selected {
+     border-top-width: 2px; /* Thinner border for compact */
+}
+/* Compact theme should inherit colors from default or dark unless specified. */
+/* For example, to make compact dark: .react-tabs.tab-theme-compact.tab-theme-dark ... */
+/* For simplicity, compact here will just adjust spacing and use default theme colors if not overridden by dark theme */
