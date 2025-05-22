@@ -41,24 +41,24 @@ const EmbeddedDashboard: React.FC<EmbeddedDashboardProps> = ({ id, isActive }) =
                 })
                 .build();
 
-            dashboard.connect()
-                .then(() => {
-                    setLocalDashboard(dashboard);
+            dashboard.connect() // This connect() method returns Promise<LookerEmbedDashboard>
+                .then(connectedDashboard => { // 'connectedDashboard' is the resolved LookerEmbedDashboard instance
+                    setLocalDashboard(connectedDashboard); // Use THIS resolved instance
                 })
-                .catch((error) => {
-                    console.error("Connection error", error);
+                .catch((error: Error) => { // Explicitly type error
+                    console.error(`Looker SDK Error: Dashboard with ID ${id} connection failed.`, error);
                 });
             
             return () => {
-                // Attempt to find a more specific cleanup method if available
-                // For now, using disconnect as a general cleanup.
-                // SDK documentation should be checked for the best practice on dashboard disposal.
-                if (localDashboard && typeof (localDashboard as any).close === 'function') {
-                    (localDashboard as any).close().catch((e: any) => console.error("Error closing dashboard:", e));
-                } else if (localDashboard && typeof localDashboard.disconnect === 'function') {
-                     localDashboard.disconnect().catch((e: any) => console.error("Error disconnecting dashboard:", e));
+                if (localDashboard && typeof localDashboard.close === 'function') {
+                    try {
+                        localDashboard.close();
+                    } catch (e) {
+                        // Log any error during close, though it's mostly best-effort
+                        console.error("Error during dashboard close:", e);
+                    }
                 }
-                setLocalDashboard(null);
+                setLocalDashboard(null); // Reset the state
             };
         }
     }, [id, setSharedFilters]); // Added setSharedFilters to dependencies
