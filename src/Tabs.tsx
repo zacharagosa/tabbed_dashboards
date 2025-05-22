@@ -80,7 +80,7 @@ export const TabbedDashboards = () => {
                 selectedIndex={tabState.activeTab}
                 onSelect={handleTabClick} // Directly use handleTabClick, it now matches the expected signature
             >
-                <TabList className="my-tab-list">
+                <TabList>
                     {tabs.map((tab, index) => (
                         <Tab key={index}>{tab.name}</Tab>
                     ))}

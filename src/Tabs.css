@@ -1,24 +1,3 @@
-.my-tabs {
-    width: 100%;
-}
-.my-tab-list {
-    display: flex; /* Keep this for horizontal layout */
-    justify-content: flex-start; /* Align tabs to the start (left) */
-    width: fit-content; /* Allow the container to shrink to the width of its contents */
-    margin-bottom: 15px;
-    border-bottom: 1px solid #ddd;
-}
-.my-tab-list .react-tabs__tab {
-    cursor: pointer;
-    border: 1px solid #ddd;
-}
-.my-tab-list .react-tabs__tab--selected {
-    border-color: #007bff;
-
-    background-color: #e9ecef;
-    border-bottom: 1px solid #fff;
-}
-
 /* Default/Horizontal styling enhancements (if any, or ensure it's not broken) */
 .react-tabs.tab-orientation-horizontal {
     /* Default flex direction is row for tab list, this is mostly a marker class */
