@@ -1,101 +1,118 @@
-import * as React from 'react';
-import  { useState } from "react"; // Removed useCallback, useRef, useEffect
+import React, { useState, useContext } from 'react';
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
+import Box from '@mui/material/Box';
+import TabContext from '@mui/lab/TabContext';
+import TabList from '@mui/lab/TabList';
+import TabPanel from '@mui/lab/TabPanel';
+import EmbeddedDashboard, { DashboardFilterContext } from "./Dashboards";
 
-import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
-import "react-tabs/style/react-tabs.scss"; // Import the Sass file
-import "./Tabs.css"; // Import your custom styles afterward
-
-import EmbeddedDashboard from "./Dashboards";
-import { DashboardFilterContext } from "./Dashboards"; // Import the context
-// LookerEmbedDashboard and LookerEmbedSDK import removed
-
+// Removed: import "react-tabs/style/react-tabs.scss";
+import "./Tabs.css"; // Keep for any global/non-component specific styles if needed, or remove if all styling is MUI-based
 
 export const TabbedDashboards = () => {
-    // Create the shared state for the filters
-    const [dashboardFilters, setDashboardFilters] = useState(null);
-    // Removed hasLoadedTabs and dashboardInstances states
+    const { dashboardFilters, setDashboardFilters } = useContext(DashboardFilterContext);
 
-    interface TabState {
-        activeTab: number;
-        // Removed 'connected' property
-    }
-
-    // tabConfig population logic remains the same
+    // tabConfig population logic (remains the same from previous version)
     const tabConfig: { name: string; id: number }[] = [];
     let i = 1;
-    // Ensure process.env is accessed safely, especially in environments where it might not be fully defined (e.g. test runners)
     const reactAppTabName = (idx: number) => process.env[`REACT_APP_TAB_${idx}_NAME`];
     const reactAppTabId = (idx: number) => process.env[`REACT_APP_TAB_${idx}_ID`];
 
     while (reactAppTabName(i) && reactAppTabId(i)) {
         tabConfig.push({
-            name: reactAppTabName(i) as string, // Added type assertion
+            name: reactAppTabName(i) as string,
             id: Number(reactAppTabId(i)),
         });
         i++;
-        // console.log(tabConfig) // Keep for debugging if necessary, but generally remove for production
     }
 
     const defaultTabConfig = [
-        { name: "Customer Behavior", id: 1 }, // Ensure these IDs are valid Looker Dashboard IDs
+        { name: "Customer Behavior", id: 1 },
         { name: "Customer Data", id: 2 },
         { name: "Customer Profile", id: 3 },
     ];
 
     const tabs = tabConfig.length > 0 ? tabConfig : defaultTabConfig;
-    // Removed dashboardRefs and embedContainerRefs
 
-    const [tabState, setTabState] = useState<TabState>({ // Added type to useState
-        activeTab: 0,
-        // Removed 'connected' initialization
-    });
+    // Initialize activeTabValue, ensuring tabs array is not empty
+    const initialTabValue = tabs.length > 0 ? '0' : ''; // Default to empty if no tabs, though UI should handle this
+    const [activeTabValue, setActiveTabValue] = useState<string>(initialTabValue);
 
-    // Removed useEffect for pre-creating dashboards
-    // Removed useEffect that called handleTabClick based on tabState.connected
+    // Environment Variables & Layout
+    const tabOrientationEnv = process.env.REACT_APP_TAB_ORIENTATION || 'horizontal';
+    const muiTabOrientation: "horizontal" | "vertical" = (tabOrientationEnv === 'vertical-left' || tabOrientationEnv === 'vertical-right') ? 'vertical' : 'horizontal';
 
-    const handleTabClick = (tabIndex: number) => { // Renamed tabId to tabIndex for clarity with onSelect
-        setTabState((prev) => ({ ...prev, activeTab: tabIndex }));
-        // Removed filter update logic from here
-    };
+    let flexContainerDirection: 'row' | 'row-reverse' | 'column' = 'column'; // Default: Tabs on top (horizontal), content below
+    if (muiTabOrientation === 'vertical') { // Simplified logic based on muiTabOrientation
+        if (tabOrientationEnv === 'vertical-left') {
+            flexContainerDirection = 'row'; // Tabs left, content right
+        } else if (tabOrientationEnv === 'vertical-right') {
+            flexContainerDirection = 'row-reverse'; // Content left, Tabs right
+        }
+    }
+    
+    // Theme class can be applied to the top-level Box if needed, or pass theme object to ThemeProvider
+    // For now, assuming Tabs.css might handle some theming based on parent classes if they were kept.
+    // const tabTheme = process.env.REACT_APP_TAB_THEME || 'default';
+    // const themeClass = `tab-theme-${tabTheme}`; // This class would need to be applied to a top-level Box or similar
 
-    // Removed handleConnected function
-
-    const tabOrientation = process.env.REACT_APP_TAB_ORIENTATION || 'horizontal';
-    let orientationClass = 'tab-orientation-horizontal';
-    if (tabOrientation === 'vertical-left') {
-        orientationClass = 'tab-orientation-vertical-left';
-    } else if (tabOrientation === 'vertical-right') {
-        orientationClass = 'tab-orientation-vertical-right';
+    if (tabs.length === 0) {
+        return <Box>No tabs configured. Please check your environment variables.</Box>;
     }
 
-    const tabTheme = process.env.REACT_APP_TAB_THEME || 'default';
-    const themeClass = `tab-theme-${tabTheme}`;
-
     return (
-        <DashboardFilterContext.Provider
-            value={{ dashboardFilters, setDashboardFilters }}
-        >
-            <Tabs
-                className={`${orientationClass} ${themeClass}`} // Combined orientation and theme classes
-                selectedIndex={tabState.activeTab}
-                onSelect={handleTabClick} // Directly use handleTabClick, it now matches the expected signature
-            >
-                <TabList>
+        <DashboardFilterContext.Provider value={{ dashboardFilters, setDashboardFilters }}>
+            <Box sx={{ 
+                display: 'flex', 
+                flexDirection: flexContainerDirection, 
+                height: 'calc(100vh - 1px)', // Adjusted height slightly for potential border
+                // className: themeClass // If applying legacy theme class via Tabs.css
+            }}>
+                <TabContext value={activeTabValue}>
+                    <Box sx={{
+                        borderBottom: muiTabOrientation === 'horizontal' ? 1 : 0,
+                        borderRight: muiTabOrientation === 'vertical' && tabOrientationEnv === 'vertical-left' ? 1 : 0,
+                        borderLeft: muiTabOrientation === 'vertical' && tabOrientationEnv === 'vertical-right' ? 1 : 0,
+                        borderColor: 'divider',
+                        order: tabOrientationEnv === 'vertical-right' ? 1 : 0,
+                        // Prevent TabList from shrinking when vertical
+                        flexShrink: 0,
+                    }}>
+                        <TabList
+                            onChange={(event: React.SyntheticEvent, newValue: string) => setActiveTabValue(newValue)}
+                            aria-label="dashboard tabs"
+                            orientation={muiTabOrientation}
+                            variant="scrollable" // Good default for many tabs
+                            scrollButtons="auto"  // Good default for many tabs
+                        >
+                            {tabs.map((tab, index) => (
+                                <Tab label={tab.name} value={String(index)} key={index} />
+                            ))}
+                        </TabList>
+                    </Box>
                     {tabs.map((tab, index) => (
-                        <Tab key={index}>{tab.name}</Tab>
+                        <TabPanel
+                            value={String(index)}
+                            key={index}
+                            sx={{
+                                padding: 0,
+                                flexGrow: 1,
+                                overflow: 'auto',
+                                // MUI TabPanel uses 'hidden' attribute for inactive panels, no need for manual visibility
+                            }}
+                        >
+                            {/* Render EmbeddedDashboard only when its tab is active to avoid loading all dashboards at once */}
+                            {activeTabValue === String(index) && (
+                                <EmbeddedDashboard
+                                    id={tab.id}
+                                    isActive={true} // isActive is always true when rendered due to the condition above
+                                />
+                            )}
+                        </TabPanel>
                     ))}
-                </TabList>
-
-                {tabs.map((tab, index) => (
-                    <TabPanel key={index}>
-                        <EmbeddedDashboard
-                            id={tab.id} // Pass the dashboard ID
-                            isActive={tabState.activeTab === index}
-                            // Removed dashboardRef and index props
-                        />
-                    </TabPanel>
-                ))}
-            </Tabs>
+                </TabContext>
+            </Box>
         </DashboardFilterContext.Provider>
     );
 };
