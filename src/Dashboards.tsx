@@ -32,10 +32,15 @@ const EmbeddedDashboard: React.FC<EmbeddedDashboardProps> = ({ id, isActive }) =
     const embedCtrRef = useRef<HTMLDivElement | null>(null);
     const [localDashboard, setLocalDashboard] = useState<LookerEmbedDashboard | null>(null);
     const isActiveRef = useRef(isActive);
+    const currentDashboardFiltersRef = useRef(dashboardFilters); // Ref for current context filters
 
     useEffect(() => {
         isActiveRef.current = isActive;
     }, [isActive]);
+
+    useEffect(() => {
+        currentDashboardFiltersRef.current = dashboardFilters;
+    }, [dashboardFilters]);
 
     useEffect(() => {
         // Ensure id is present; though as a prop, it should always be.
@@ -43,8 +48,19 @@ const EmbeddedDashboard: React.FC<EmbeddedDashboardProps> = ({ id, isActive }) =
             let dashboardBuilder = LookerEmbedSDK.createDashboardWithId(id)
                 .appendTo(embedCtrRef.current)
                 .on('dashboard:filters:changed', (event) => {
-                    if (isActiveRef.current) { // Only update context if this tab is active
-                        setSharedFilters(event.dashboard.dashboard_filters);
+                    // Inside the .on('dashboard:filters:changed', (event) => { ... }) callback,
+                    // within the main dashboard creation useEffect:
+
+                    if (isActiveRef.current) {
+                        const newEventFilters = event.dashboard.dashboard_filters || {}; // Default to empty object if event filters are null/undefined
+                        
+                        // currentDashboardFiltersRef.current could be null (initial state) or an object.
+                        // If currentDashboardFiltersRef.current is null and newEventFilters is {}, stringify will match "{}".
+                        // If currentDashboardFiltersRef.current is {} and newEventFilters is {}, stringify will match.
+                        // This comparison correctly handles transitions to/from empty/null states.
+                        if (JSON.stringify(newEventFilters) !== JSON.stringify(currentDashboardFiltersRef.current)) {
+                            setSharedFilters(newEventFilters);
+                        }
                     }
                 });
 
@@ -79,11 +95,20 @@ const EmbeddedDashboard: React.FC<EmbeddedDashboardProps> = ({ id, isActive }) =
 
     useEffect(() => {
         if (isActive && localDashboard && dashboardFilters) {
-            // Consider adding a deep comparison here if dashboardFilters can be complex
-            // and to avoid unnecessary updates if the filters haven't actually changed.
-            localDashboard.updateFilters(dashboardFilters);
+            // Basic check to prevent redundant updates if filters are already in sync
+            // Note: localDashboard.options?.filters might not be available or accurate for all SDK versions/setups.
+            // Consider this a best-effort optimization.
+            if (JSON.stringify(localDashboard.options?.filters) !== JSON.stringify(dashboardFilters)) {
+                 localDashboard.updateFilters(dashboardFilters);
+            }
+        } else if (isActive && localDashboard && (!dashboardFilters || Object.keys(dashboardFilters).length === 0)) {
+            // If context clears filters (dashboardFilters is null or empty), and this tab is active, clear its filters too.
+            // Check if local dashboard actually has filters before clearing to avoid redundant calls.
+            if (localDashboard.options?.filters && Object.keys(localDashboard.options.filters).length > 0) {
+                localDashboard.updateFilters({});
+            }
         }
-    }, [dashboardFilters, isActive, localDashboard]);
+    }, [isActive, localDashboard, JSON.stringify(dashboardFilters)]); // Use stringified filters for dependency
 
     return <EmbedContainer ref={embedCtrRef} isActive={isActive} />;
 };
