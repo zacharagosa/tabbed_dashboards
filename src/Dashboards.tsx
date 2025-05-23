@@ -33,15 +33,22 @@ const EmbeddedDashboard: React.FC<EmbeddedDashboardProps> = ({ id, isActive }) =
     const [localDashboard, setLocalDashboard] = useState<LookerEmbedDashboard | null>(null);
 
     useEffect(() => {
-        if (embedCtrRef.current) {
-            const dashboard = LookerEmbedSDK.createDashboardWithId(id)
+        // Ensure id is present; though as a prop, it should always be.
+        if (embedCtrRef.current && id) { 
+            let dashboardBuilder = LookerEmbedSDK.createDashboardWithId(id)
                 .appendTo(embedCtrRef.current)
-                .on("dashboard:filters:changed", (event) => {
+                .on('dashboard:filters:changed', (event) => {
                     setSharedFilters(event.dashboard.dashboard_filters);
-                })
-                .build();
+                });
 
-            dashboard.connect() // This connect() method returns Promise<LookerEmbedDashboard>
+            // Apply filters from context if they exist and are not empty
+            if (dashboardFilters && Object.keys(dashboardFilters).length > 0) {
+                dashboardBuilder = dashboardBuilder.withFilters(dashboardFilters);
+            }
+
+            const client = dashboardBuilder.build();
+
+            client.connect() // This connect() method returns Promise<LookerEmbedDashboard>
                 .then(connectedDashboard => { // 'connectedDashboard' is the resolved LookerEmbedDashboard instance
                     setLocalDashboard(connectedDashboard); // Use THIS resolved instance
                 })
