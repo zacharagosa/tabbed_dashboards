@@ -1,6 +1,6 @@
 # Tabbed Looker Dashboards React/Typescript Example
 
-This is a sample Looker Extension written in TypeScript and React. It demonstrates how to embed multiple Looker dashboards within a tabbed interface. The extension uses the Looker Extension SDK for authentication and the Looker Embed SDK for rendering dashboards.
+This is a sample Looker Extension written in TypeScript and React. It demonstrates how to embed multiple Looker dashboards within a tabbed interface using Material-UI (MUI) components. The extension uses the Looker Extension SDK for authentication and the Looker Embed SDK for rendering dashboards.
 
 ## Features
 - Embed multiple Looker dashboards.
@@ -86,10 +86,10 @@ yarn build
 This command bundles the application into the `dist` folder.
 
 ## Key Files
-- `src/App.tsx`: Main application component.
-- `src/Tabs.tsx`: Handles tab creation, dashboard embedding logic, orientation, and theming.
+- `src/App.tsx`: Main application component, including Material-UI (MUI) ThemeProvider setup for custom themes.
+- `src/Tabs.tsx`: Handles tab creation using Material-UI (MUI) components, dashboard embedding logic, and reads environment variables for orientation.
 - `src/Dashboards.tsx`: Component for embedding individual Looker dashboards.
-- `src/Tabs.css`: Contains styles for tab orientation and theming.
+- `src/Tabs.css`: Previously contained custom styles for `react-tabs`. Styling is now primarily handled by MUI's theming system (defined in `src/App.tsx`) and component-level `sx` props. This file is now largely empty or contains minimal global overrides.
 - `webpack.config.js`: Webpack configuration for bundling.
 
 ## License
