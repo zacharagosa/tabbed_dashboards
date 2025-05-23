@@ -31,6 +31,11 @@ const EmbeddedDashboard: React.FC<EmbeddedDashboardProps> = ({ id, isActive }) =
     const { dashboardFilters, setDashboardFilters: setSharedFilters } = useContext(DashboardFilterContext);
     const embedCtrRef = useRef<HTMLDivElement | null>(null);
     const [localDashboard, setLocalDashboard] = useState<LookerEmbedDashboard | null>(null);
+    const isActiveRef = useRef(isActive);
+
+    useEffect(() => {
+        isActiveRef.current = isActive;
+    }, [isActive]);
 
     useEffect(() => {
         // Ensure id is present; though as a prop, it should always be.
@@ -38,7 +43,9 @@ const EmbeddedDashboard: React.FC<EmbeddedDashboardProps> = ({ id, isActive }) =
             let dashboardBuilder = LookerEmbedSDK.createDashboardWithId(id)
                 .appendTo(embedCtrRef.current)
                 .on('dashboard:filters:changed', (event) => {
-                    setSharedFilters(event.dashboard.dashboard_filters);
+                    if (isActiveRef.current) { // Only update context if this tab is active
+                        setSharedFilters(event.dashboard.dashboard_filters);
+                    }
                 });
 
             // Apply filters from context if they exist and are not empty
@@ -86,14 +93,14 @@ export default EmbeddedDashboard;
 // Styled container for the embedded dashboard
 export const EmbedContainer = styled.div<{ isActive?: boolean }>`
   width: 100%;
-  height: 95vh;
-  opacity: ${({ isActive }) => (isActive ? 1 : 0)};
-  transition: opacity 0.5s ease-in-out;
-  pointer-events: ${({ isActive }) => (isActive ? 'auto' : 'none')}; /* Prevent interaction with hidden dashboards */
-
+  height: 100%; /* Changed from 95vh to fill TabPanel better */
+  display: ${props => props.isActive ? 'flex' : 'none'}; /* Use flex to allow iframe to fill */
+  flex-direction: column; /* Ensure iframe content flows correctly */
+  
   & > iframe {
+    flex-grow: 1; /* Allow iframe to take available space */
+    border: none; /* Remove default iframe border */
     width: 100%;
     height: 100%;
-    border: none; /* Remove default iframe border */
   }
 `;

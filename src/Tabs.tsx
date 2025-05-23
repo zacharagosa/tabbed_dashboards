@@ -102,13 +102,10 @@ export const TabbedDashboards = () => {
                                 // MUI TabPanel uses 'hidden' attribute for inactive panels, no need for manual visibility
                             }}
                         >
-                            {/* Render EmbeddedDashboard only when its tab is active to avoid loading all dashboards at once */}
-                            {activeTabValue === String(index) && (
-                                <EmbeddedDashboard
-                                    id={tab.id}
-                                    isActive={true} // isActive is always true when rendered due to the condition above
-                                />
-                            )}
+                            <EmbeddedDashboard
+                                id={tab.id}
+                                isActive={activeTabValue === String(index)} // Correctly pass active state
+                            />
                         </TabPanel>
                     ))}
                 </TabContext>
