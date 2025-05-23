@@ -2,6 +2,7 @@ import React, { useState, useContext } from 'react';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography'; // Added Typography import
 import TabContext from '@mui/lab/TabContext';
 import TabList from '@mui/lab/TabList';
 import TabPanel from '@mui/lab/TabPanel';
@@ -61,15 +62,44 @@ export const TabbedDashboards = () => {
         return <Box>No tabs configured. Please check your environment variables.</Box>;
     }
 
+    // The check for tabs.length === 0 should come before rendering the debug display or tabs.
+    if (tabs.length === 0) {
+        return <Box>No tabs configured. Please check your environment variables.</Box>;
+    }
+
+    // Calculate approximate height of the debug box + its margins to adjust main content height
+    // This is a rough estimate, actual height might vary based on content and MUI theme spacing.
+    const debugBoxEstimatedHeight = "130px"; // e.g., 100px maxHeight + 2*theme.spacing(1) padding + marginBottom
+
     return (
         <DashboardFilterContext.Provider value={{ dashboardFilters, setDashboardFilters }}>
-            <Box sx={{ 
-                display: 'flex', 
-                flexDirection: flexContainerDirection, 
-                height: 'calc(100vh - 1px)', // Adjusted height slightly for potential border
-                // className: themeClass // If applying legacy theme class via Tabs.css
+            <Box sx={{ padding: 1, borderBottom: 1, borderColor: 'divider', mb: 1 }}>
+                <Typography variant="caption" component="div" sx={{ fontWeight: 'bold' }}>
+                    DEBUG: Current Shared Filters:
+                </Typography>
+                <Box component="pre" sx={{
+                    padding: 1,
+                    backgroundColor: (theme) => theme.palette.background.default, // Theme aware background
+                    border: (theme) => `1px solid ${theme.palette.divider}`,
+                    maxHeight: '100px',
+                    overflowY: 'auto',
+                    whiteSpace: 'pre-wrap',
+                    wordBreak: 'break-all',
+                    fontSize: '0.75rem',
+                    mt: 0.5,
+                }}>
+                    {JSON.stringify(dashboardFilters, null, 2) || 'null'}
+                </Box>
+            </Box>
+
+            <Box sx={{
+                display: 'flex',
+                flexDirection: flexContainerDirection,
+                // Adjust height to account for the debug box above
+                height: `calc(100vh - 1px - ${debugBoxEstimatedHeight})`, 
             }}>
                 <TabContext value={activeTabValue}>
+                    {/* ... rest of the TabContext, TabList, TabPanel structure ... */}
                     <Box sx={{
                         borderBottom: muiTabOrientation === 'horizontal' ? 1 : 0,
                         borderRight: muiTabOrientation === 'vertical' && tabOrientationEnv === 'vertical-left' ? 1 : 0,
